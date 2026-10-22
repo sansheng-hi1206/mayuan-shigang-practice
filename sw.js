@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quiz-offline-20261022-3';
+const CACHE_NAME = 'quiz-offline-20261022-4';
 const ASSETS = [
   "./",
   "./15043%E3%80%8A%E5%8F%B2%E7%BA%B2%E3%80%8B/15043%E3%80%8A%E4%B8%AD%E5%9B%BD%E8%BF%91%E7%8E%B0%E4%BB%A3%E5%8F%B2%E7%BA%B2%E8%A6%81%E3%80%8B%E7%9C%9F%E9%A2%98%E5%8F%8A%E7%AD%94%E6%A1%88%EF%BC%88%E5%8E%9F%E4%BB%A3%E7%A0%8103708%EF%BC%89/%E7%9C%9F%E9%A2%98/202304%E3%80%8A%E4%B8%AD%E5%9B%BD%E8%BF%91%E7%8E%B0%E4%BB%A3%E5%8F%B2%E7%BA%B2%E8%A6%81%E3%80%8B%E7%9C%9F%E9%A2%98%E5%8F%8A%E7%AD%94%E6%A1%88.docx",
@@ -16,7 +16,8 @@ const ASSETS = [
   "./15044%E3%80%8A%E9%A9%AC%E5%85%8B%E6%80%9D%E4%B8%BB%E4%B9%89%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E3%80%8B%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98+%E5%A4%8D%E4%B9%A0%E8%B5%84%E6%96%99/%E7%9C%9F%E9%A2%98/15044%E3%80%8A%E9%A9%AC%E5%85%8B%E6%80%9D%E4%B8%BB%E4%B9%89%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E3%80%8B2025%E5%B9%B404%E6%9C%88%E7%9C%9F%E9%A2%98%E5%8F%8A%E7%AD%94%E6%A1%88.pdf",
   "./15044%E3%80%8A%E9%A9%AC%E5%85%8B%E6%80%9D%E4%B8%BB%E4%B9%89%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E3%80%8B%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98+%E5%A4%8D%E4%B9%A0%E8%B5%84%E6%96%99/%E7%9C%9F%E9%A2%98/15044%E3%80%8A%E9%A9%AC%E5%85%8B%E6%80%9D%E4%B8%BB%E4%B9%89%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E3%80%8B2025%E5%B9%B410%E6%9C%88%E7%9C%9F%E9%A2%98%E5%8F%8A%E7%AD%94%E6%A1%88.pdf",
   "./15044%E3%80%8A%E9%A9%AC%E5%85%8B%E6%80%9D%E4%B8%BB%E4%B9%89%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E3%80%8B%E5%8E%86%E5%B9%B4%E7%9C%9F%E9%A2%98+%E5%A4%8D%E4%B9%A0%E8%B5%84%E6%96%99/%E7%9C%9F%E9%A2%98/15044%E3%80%8A%E9%A9%AC%E5%85%8B%E6%80%9D%E4%B8%BB%E4%B9%89%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86%E3%80%8B2026%E5%B9%B404%E6%9C%88%E7%9C%9F%E9%A2%98%E5%8F%8A%E7%AD%94%E6%A1%88.pdf",
-  "./index.html"
+  "./index.html",
+  "./latest.html"
 ];
 
 self.addEventListener('install', event => {
@@ -33,6 +34,18 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      let response;
+      try { response = await fetch(event.request); }
+      catch { return caches.match(event.request, { ignoreSearch: true }); }
+      if (response.ok) {
+        try { await (await caches.open(CACHE_NAME)).put(event.request, response.clone()); } catch {}
+      }
+      return response;
+    })());
+    return;
+  }
   event.respondWith(caches.match(event.request, { ignoreSearch: true })
     .then(cached => cached || fetch(event.request)));
 });
